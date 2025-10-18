@@ -74,3 +74,191 @@ int main() {
 
     return 0;
 }
+
+
+
+
+Ejemplo 2
+
+#include <cmath>
+#include <iostream>
+#define N 12
+
+using namespace std;
+
+void cargabin(int comb,int cromosoma[N],int base,int cantProyectos) {
+    for (int i=0;i<cantProyectos;i++) {
+        cromosoma[i]=0;
+    }
+    int j=0;
+    while (comb>0) {
+        cromosoma[j]= comb%base;
+        comb=comb/base;
+        j++;
+    }
+}
+int main() {
+    int cantProyectos = 8;
+    int Proyectos[N][2]={
+        {80,150},
+        {20,80},
+        {100,300},
+        {100,150},
+        {50,80},
+        {10,50},
+        {50,120},
+        {50,150}};
+    int Predecesores[N][3]={
+        {0,0,0},
+        {0,0,0},
+        {1,2,0},
+        {0,0,0},
+        {0,0,0},
+        {2,0,0},
+        {6,0,0},
+        {6,0,0}
+    };
+    int base =2;
+    int cromosoma[N];
+    int combinaciones = pow(base,cantProyectos);
+    int CostoMaximo=250;
+    int cumple_condicion;
+    int MaxCosto=-9999,MaxGanancia=-999;
+    int mejor_combinacion=0;
+    for (int i=0;i<combinaciones;i++) {
+        int costoCromo=0,gananciaCromo=0;
+        cargabin(i,cromosoma,base,cantProyectos);
+        for (int j=0;j<cantProyectos;j++) {
+            if (cromosoma[j]) {
+                 cumple_condicion=1;
+                for (int k=0;k<3;k++) {
+                    if (Predecesores[j][k]!=0) {
+                        if (cromosoma[Predecesores[j][k]-1]==0) {
+                            cumple_condicion=0;
+                        }
+                    }
+                }
+                if (cumple_condicion==0) {
+                    break;
+                }else {
+                    costoCromo+= Proyectos[j][0];
+                    gananciaCromo+= Proyectos[j][1];
+                }
+            }
+        }
+        if (costoCromo<=CostoMaximo &&  gananciaCromo>=MaxGanancia && costoCromo>=MaxCosto) {
+            mejor_combinacion = i;
+            MaxGanancia = gananciaCromo;
+            MaxCosto = costoCromo;
+        }
+    }
+    cout<<"Mejos solucion:" <<mejor_combinacion<<endl;
+    cargabin(mejor_combinacion,cromosoma,base,cantProyectos);
+
+    for (int i=0;i<cantProyectos;i++) {
+        if (cromosoma[i]==1) {
+            cout<<"P:"<<i+1<<" "<<Proyectos[i][0]<<" "<<Proyectos[i][1]<<" ";
+            for (int j=0;j<3;j++) {
+                if (Predecesores[i][j]!=0) {
+                    cout<<Predecesores[i][j]<<" ";
+                }
+            }
+            cout<<endl;
+        }
+    }
+    return 0;
+}
+
+
+Ejemplo Particular
+#include <cmath>
+#include <iostream>
+#define N 15
+using namespace  std;
+
+void cargabin(int comb,int cromosoma[N],int cantPed) {
+    for (int i=0 ; i<cantPed ; i++) {
+        cromosoma[i] = 0;
+    }
+    int j=0;
+    while (comb>0) {
+        cromosoma[j] = comb%2;
+        comb = comb/2;
+        j++;
+    }
+}
+
+int main() {
+    int pedidos [N][3]={
+        {4,8,2},
+        {2,10,2},
+        {3,12,2},
+        {1,13,2},
+        {3,15,1},
+        {1,10,2},
+        {4,16,1},
+        {2,8,2},
+        {3,14,1},
+        {2,18,2},
+        {1,18,2},
+        {4,14,2}
+    };
+    int mejor_solucion;
+    int cantPed = 12;
+    int combinaciones = pow(2,cantPed);
+    int cromosoma[N];
+    for (int i=0;i<combinaciones;i++) {
+        int horas[24]{};
+        int minimoPrioridad[4] = {2,2,1,1};
+        cargabin(i,cromosoma,cantPed);
+        bool horaValida=true;
+        bool prioridadValida=true;
+        for (int j=0;j<cantPed;j++) {
+            if (cromosoma[j]==1) {
+                int prioridad = pedidos[j][0];
+                int Hinicio = pedidos[j][1];
+                int canthoras = pedidos[j][2];
+                for (int h=Hinicio;h<Hinicio+canthoras;h++) {
+                    if (h>=24 || horas[h]==1) {
+                        horaValida = false;
+                        break;
+                    }
+                    horas[h] =1;
+                }
+                if (!horaValida) break;
+
+                if (prioridad ==1) minimoPrioridad[0]--;
+                if (prioridad ==2) minimoPrioridad[1]--;
+                if (prioridad ==3) minimoPrioridad[2]--;
+                if (prioridad ==4) minimoPrioridad[3]--;
+            }
+        }
+
+        for (int l=0;l<4;l++) if (minimoPrioridad[l]>0) prioridadValida =false;
+
+        if (horaValida && prioridadValida) {
+            mejor_solucion=i;
+            cout<<"Mejor solucion;"<<mejor_solucion<<endl;
+            cargabin(mejor_solucion,cromosoma,cantPed);
+            for (int i=0;i<cantPed;i++) {
+                if (cromosoma[i]==1) {
+                    cout<<"Ped:"<<100+i<<" "<<pedidos[i][0]<<" "<<pedidos[i][1]<<" "<<pedidos[i][2]<<endl;
+                }
+            }
+        }
+    }
+    // cout<<"Mejor solucion;"<<mejor_solucion<<endl;
+    // cargabin(mejor_solucion,cromosoma,cantPed);
+    // for (int i=0;i<cantPed;i++) {
+    //     if (cromosoma[i]==1) {
+    //         cout<<"Ped:"<<100+i<<" "<<pedidos[i][0]<<" "<<pedidos[i][1]<<" "<<pedidos[i][2]<<endl;
+    //     }
+    // }
+
+    return 0;
+}
+
+
+
+
+
