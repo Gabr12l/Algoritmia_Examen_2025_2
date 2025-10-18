@@ -1,0 +1,82 @@
+#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#define N 10
+
+using namespace std;
+
+void cargaBin(int i,int cromosoma[N],int base,int cantVelocidades) {
+    for (int j=0;j<cantVelocidades;j++) {
+        cromosoma[j] =0;
+    }
+    int j=0;
+    while (i>0) {
+        cromosoma[j]=i%base;
+        i = i/base;
+        j++;
+    }
+}
+int main() {
+    int velocidades[N] = {150,100,80,50,120,10};
+    int cantVelocidades = 6;
+    int base = 4;
+    int capacidadDisco[N] = {250,200,200};
+    int cantdiscos = 3;
+    int combinaciones = (int)pow(base,cantVelocidades);
+    int cromosoma[cantVelocidades];
+    int mayorMinimo = -1;
+    int resultado;
+
+    for (int i=0;i<combinaciones;i++) {
+        cargaBin(i,cromosoma,base,cantVelocidades);
+        int uso [N] = {0,0,0};
+        int usoVel[N]={0,0,0,0,0,0};
+        int auxCapacidades[cantVelocidades];
+        for (int j=0;j<cantdiscos;j++) auxCapacidades[j] = capacidadDisco[j];
+        for (int k=0;k<cantVelocidades;k++) {
+            if (cromosoma[k]>0) {
+                int disco = cromosoma[k]-1;
+                auxCapacidades[disco] -= velocidades[k];
+                uso[disco]++;
+                usoVel[k]++;
+            }
+        }
+        bool valido = true;
+        for (int i=0;i<cantdiscos;i++) {
+            if (auxCapacidades[i]<0 || uso[i]==0) valido= false;
+        }
+        for (int i=0;i<cantVelocidades;i++) {
+            if (usoVel[i]==0) valido = false;
+        }
+        if (valido) {
+            int minimo = auxCapacidades[0];
+            for(int j=0;j<cantdiscos;j++) {
+                if (auxCapacidades[j]<=minimo) minimo = auxCapacidades[j];
+            }
+            if (minimo > mayorMinimo) {
+                mayorMinimo = minimo;
+                resultado = i;
+                // cout << "Mejor performance (minimo de discos) = " << mayorMinimo << endl;
+                // for (int d=1; d<=cantdiscos; d++) {
+                //     cout << "Disco " << d<< ": ";
+                //     cargaBin(resultado,cromosoma,base,cantVelocidades);
+                //     for (int j=0;j<cantVelocidades;j++) {
+                //         if (cromosoma[j]==d) cout << (j+1)<< " "; // tabla j+1
+                //     }
+                //     cout << endl;
+                // }
+            }
+        }
+    }
+    cout << "Mejor performance (minimo de discos) = " << mayorMinimo << endl;
+    for (int d=1; d<=cantdiscos; d++) {
+        cout << "Disco " << d<< ": ";
+        cargaBin(resultado,cromosoma,base,cantVelocidades);
+        for (int j=0;j<cantVelocidades;j++) {
+            if (cromosoma[j]==d) cout << (j+1)<< " "; // tabla j+1
+        }
+        cout << endl;
+    }
+    return 0;
+}
