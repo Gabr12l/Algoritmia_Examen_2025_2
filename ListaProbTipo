@@ -86,3 +86,197 @@ int main() {
 
     return 0;
 }
+
+
+
+//ben hour
+
+#include <iostream>
+#include <fstream>
+#include "BibliotecaLista/funcionesLista.h"
+#include "BibliotecaLista/Lista.h"
+using namespace  std;
+//20203275
+void LeerCuadriga(const char *nomArch,Lista &cuadriga) {
+    ifstream archCuadriga (nomArch,ios::in);
+    if (!archCuadriga) {
+        cout<<"No se pudo abrir el archivo"<<endl;
+        exit(1);
+    }
+    ElementoLista elementoCuadriga;
+    char c;
+    while (1) {
+        archCuadriga>>elementoCuadriga.id>>c;
+        if (archCuadriga.eof()) break;
+        archCuadriga.getline(elementoCuadriga.nombre, 50,',');
+        archCuadriga.getline(elementoCuadriga.color, 20);
+        insertarAlFinal(cuadriga,elementoCuadriga);
+    }
+}
+void reordenarLista(Lista &cuadriga) {
+    NodoLista *ptrImpInicio,*ptrImpFinal,*ptrParInicio,*ptrParFinal;
+    ptrImpInicio=nullptr;
+    ptrImpFinal=nullptr;
+    ptrParInicio=nullptr;
+    ptrParFinal=nullptr;
+    while (!esListaVacia(cuadriga)) {
+        NodoLista *actual = cuadriga.cabeza;
+        // int idCuadriga = cuadriga.cabeza->elemento.id;
+        cuadriga.cabeza = cuadriga.cabeza->siguiente;
+        actual->siguiente = nullptr;
+        if (actual->elemento.id%2==0) {
+            if (ptrParInicio==nullptr) {
+                ptrParInicio = actual;
+                ptrParFinal = actual;
+            }else {
+                ptrParFinal->siguiente = actual;
+                ptrParFinal= actual;
+            }
+        }else {
+            if (ptrImpInicio==nullptr) {
+                ptrImpInicio = actual;
+                ptrImpFinal = actual;
+            }else {
+                ptrImpFinal->siguiente = actual;
+                ptrImpFinal= actual;
+            }
+        }
+    }
+    if (ptrParFinal==nullptr) {
+        ptrParInicio = ptrImpInicio;
+    }else {
+        ptrParFinal->siguiente = ptrImpInicio;
+    }
+    cuadriga.cabeza = ptrParInicio;
+}
+
+
+int main(){
+    Lista cuadriga;
+    LeerCuadriga("Cuadriga.txt",cuadriga);
+    imprimir(cuadriga);
+    reordenarLista(cuadriga);
+    imprimir(cuadriga);
+
+    return 0;
+}
+
+
+//pollostiko
+#include <iostream>
+using namespace  std;
+
+#include "BibliotecaLista/Lista.h"
+#include "BibliotecaLista/funcionesLista.h"
+
+void fusionLista(Lista &listaLunes,Lista &listaMartes) {
+    NodoLista *aux = obtenerUltimoNodo(listaLunes);
+    NodoLista *aux2 = obtenerUltimoNodo(listaMartes);
+    if (aux->elemento.codigo < listaMartes.lista->elemento.codigo) {
+        aux->siguiente = listaMartes.lista;
+
+    }else {
+        if (aux2->elemento.codigo <listaLunes.lista->elemento.codigo) {
+            aux2->siguiente= listaLunes.lista;
+            listaLunes.lista = listaMartes.lista;
+        }
+
+        else {
+            NodoLista *ptrInicio = nullptr,*ptrfin = nullptr;
+            while (!esListaVacia(listaLunes) && !esListaVacia(listaMartes)) {
+                if (listaLunes.lista->elemento.codigo <= listaMartes.lista->elemento.codigo) {
+                    if (ptrInicio==nullptr) {
+                        ptrInicio = listaLunes.lista;
+                        ptrfin = listaLunes.lista;
+                    }
+                    else {
+                        ptrfin->siguiente = listaLunes.lista;
+                        ptrfin = listaLunes.lista;
+                    }
+                    listaLunes.lista = listaLunes.lista->siguiente;
+                }else {
+                    if (ptrInicio==nullptr) {
+                        ptrInicio = listaMartes.lista;
+                        ptrfin = listaMartes.lista;
+                    }else {
+                        ptrfin->siguiente = listaMartes.lista;
+                        ptrfin = listaMartes.lista;
+                    }
+                    listaMartes.lista = listaMartes.lista->siguiente;
+                }
+            }
+            //mover todo lo que queda
+            while (!esListaVacia(listaLunes)) {
+                ptrfin->siguiente = listaLunes.lista;
+                ptrfin = listaLunes.lista;
+                listaLunes.lista = listaLunes.lista->siguiente;
+            }
+            while (!esListaVacia(listaMartes)) {
+                ptrfin->siguiente = listaMartes.lista;
+                ptrfin = listaMartes.lista;
+                listaMartes.lista = listaMartes.lista->siguiente;
+            }
+            listaLunes.lista = ptrInicio;
+        }
+    }
+}
+
+
+
+int main() {
+    Lista listaLunes,listaMartes,listaMiercoles,listaJueves,listaViernes;
+    construir(listaLunes);
+    construir(listaMartes);
+    construir(listaMiercoles);
+    construir(listaJueves);
+    construir(listaViernes);
+    ElementoLista elemento;
+    elemento.codigo = 8;
+    elemento.dia = 1;
+    elemento.sucursal = 6;
+    insertarAlFinal(listaLunes,elemento);
+    elemento.codigo = 10;
+    elemento.dia = 1;
+    elemento.sucursal = 14;
+    insertarAlFinal(listaLunes,elemento);
+    elemento.codigo = 12;
+    elemento.dia = 1;
+    elemento.sucursal = 1;
+    insertarAlFinal(listaLunes,elemento);
+
+    elemento.codigo = 9;
+    elemento.dia = 2;
+    elemento.sucursal = 3;
+    insertarAlFinal(listaMartes,elemento);
+    elemento.codigo = 11;
+    elemento.dia = 2;
+    elemento.sucursal = 8;
+    insertarAlFinal(listaMartes,elemento);
+
+    elemento.codigo = 8;
+    elemento.dia = 3;
+    elemento.sucursal = 2;
+    insertarAlFinal(listaMiercoles,elemento);
+    elemento.codigo = 9;
+    elemento.dia = 3;
+    elemento.sucursal = 5;
+    insertarAlFinal(listaMiercoles,elemento);
+    elemento.codigo = 10;
+    elemento.dia = 3;
+    elemento.sucursal = 10;
+    insertarAlFinal(listaMiercoles,elemento);
+
+    imprimir(listaLunes);
+    imprimir(listaMartes);
+    imprimir(listaMiercoles);
+
+    fusionLista(listaLunes,listaMartes);
+    fusionLista(listaLunes,listaMiercoles);
+    imprimir(listaLunes);
+
+
+
+
+
+    return 0;
+}
