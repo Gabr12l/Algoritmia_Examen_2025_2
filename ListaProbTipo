@@ -1,0 +1,88 @@
+#include "BibliotecaListas/ElementoLista.h"
+#include "BibliotecaListas/funcionesLista.h"
+#include "BibliotecaListas/Lista.h"
+
+void reorganizarLoista(Lista &lista) {
+    NodoLista   *auxInA=nullptr,*auxFinA=nullptr;
+    NodoLista   *auxInBloq=nullptr,*auxFinBloq=nullptr;
+    NodoLista   *auxInSolos=nullptr,*auxFinSolos=nullptr;
+
+    while (!esListaVacia(lista)) {
+        NodoLista*aux=lista.cabeza;
+        if (aux->elemento.prioridad=='A') {
+            if (auxInA==nullptr) {
+                auxInA=aux;
+            }else {
+                auxFinA->siguiente=aux;
+            }
+            auxFinA=aux;
+            lista.cabeza=lista.cabeza->siguiente;
+        }else {
+            if (aux->siguiente==nullptr ||aux->elemento.prioridad!=aux->siguiente->elemento.prioridad){
+                    if (auxInSolos==nullptr) {
+                        auxInSolos=aux;
+                    }else {
+                        auxFinSolos->siguiente=aux;
+                    }
+                    auxFinSolos=aux;
+                    lista.cabeza=lista.cabeza->siguiente;
+            }else {
+                if (auxInBloq==nullptr) {
+                    auxInBloq=aux;
+                    auxFinBloq=aux;
+                }else {
+                    auxFinBloq->siguiente=aux;
+                    auxFinBloq=aux;
+                }
+                //Vamos a avanzar hasta que termine el bloque
+                aux=lista.cabeza->siguiente;
+                lista.cabeza=lista.cabeza->siguiente;
+                while (aux->siguiente!=nullptr && aux->elemento.prioridad==aux->siguiente->elemento.prioridad) {
+                    auxFinBloq = aux;
+                    aux=lista.cabeza->siguiente;
+                    lista.cabeza=lista.cabeza->siguiente;
+                }
+                auxFinBloq=aux;
+                aux=lista.cabeza->siguiente;
+                lista.cabeza=lista.cabeza->siguiente;
+            }
+        }
+    }
+    lista.cabeza = auxInA;
+    auxFinA->siguiente=auxInBloq;
+    auxFinBloq->siguiente=auxInSolos;
+    auxFinSolos->siguiente=nullptr;
+}
+
+using namespace  std;
+int main() {
+    Lista lista;
+    construir(lista);
+    ElementoLista elemento;
+    elemento.codigo = 1;
+    elemento.prioridad = 'B';
+    elemento.cantidad = 10;
+    insertarAlFinal(lista, elemento);
+    elemento.codigo = 2;
+    elemento.prioridad = 'A';
+    elemento.cantidad = 20;
+    insertarAlFinal(lista, elemento);
+    elemento.codigo = 3;
+    elemento.prioridad = 'B';
+    elemento.cantidad = 15;
+    insertarAlFinal(lista, elemento);
+    elemento.codigo = 4;
+    elemento.prioridad = 'B';
+    elemento.cantidad = 12;
+    insertarAlFinal(lista, elemento);
+    elemento.codigo = 5;
+    elemento.prioridad = 'C';
+    elemento.cantidad = 5;
+    insertarAlFinal(lista, elemento);
+    imprimir(lista);
+    reorganizarLoista(lista);
+    imprimir(lista);
+
+
+    return 0;
+}
