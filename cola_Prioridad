@@ -96,3 +96,74 @@ void imprimir(const struct Cola & colaTAD) {
         cout << "]" << endl;
     }
 }
+
+3 prioridades
+
+
+#include "Cola.h"
+#include <iostream>
+using namespace std;
+
+void encolarPrioridad(struct Cola &cola, const struct ElementoCola &elemento) {
+    NodoCola *nuevo = new NodoCola{};
+    nuevo->elemento = elemento;
+    nuevo->siguiente = nullptr;
+
+    if (cola.inicio == nullptr) {
+        // Si la cola está vacía
+        cola.inicio = cola.fin = nuevo;
+        if (elemento.prioridad == 'R') cola.priAlta = nuevo;
+        else if (elemento.prioridad == 'A') cola.priMedia = nuevo;
+        cola.longitud++;
+        return;
+    }
+
+    // 🔴 CASO 1: prioridad Alta (R)
+    if (elemento.prioridad == 'R') {
+        if (cola.priAlta == nullptr) {
+            // No hay 'R' aún: insertar al inicio
+            nuevo->siguiente = cola.inicio;
+            cola.inicio = nuevo;
+        } else {
+            // Insertar después del último 'R'
+            nuevo->siguiente = cola.priAlta->siguiente;
+            cola.priAlta->siguiente = nuevo;
+        }
+        cola.priAlta = nuevo;
+        // Si aún no hay 'A', ajustar priMedia
+        if (cola.priMedia == nullptr) cola.priMedia = cola.priAlta;
+    }
+
+    // 🟡 CASO 2: prioridad Media (A)
+    else if (elemento.prioridad == 'A') {
+        if (cola.priMedia == nullptr) {
+            // No hay 'A' aún
+            if (cola.priAlta != nullptr) {
+                // Insertar después del último 'R'
+                nuevo->siguiente = cola.priAlta->siguiente;
+                cola.priAlta->siguiente = nuevo;
+            } else {
+                // No hay 'R' → insertar al inicio
+                nuevo->siguiente = cola.inicio;
+                cola.inicio = nuevo;
+            }
+        } else {
+            // Insertar después del último 'A'
+            nuevo->siguiente = cola.priMedia->siguiente;
+            cola.priMedia->siguiente = nuevo;
+        }
+        cola.priMedia = nuevo;
+        if (nuevo->siguiente == nullptr) cola.fin = nuevo;
+    }
+
+    // 🟢 CASO 3: prioridad Baja (V)
+    else {
+        cola.fin->siguiente = nuevo;
+        cola.fin = nuevo;
+    }
+
+    cola.longitud++;
+}
+
+
+
