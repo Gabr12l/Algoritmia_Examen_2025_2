@@ -1,0 +1,76 @@
+#include <cmath>
+#include <iostream>
+#include <cmath>
+#define N 12
+
+using namespace  std;
+void cargabin(int comb,int cromosoma[N],int cantRec) {
+    for (int i=0;i<cantRec;i++) cromosoma[i]=0;
+    int j=0;
+    while (comb>0) {
+        cromosoma[j] = comb%2;
+        comb = comb/2;
+        j++;
+    }
+}
+int main() {
+    int Recurso[N][2]={
+        {50,120},
+        {40,110},
+        {80,140},
+        {70,130},
+        {85,160},
+        {140,250},
+        {55,100},
+        {130,240},
+        {30,90},
+        {150,300}
+    };
+    int recImp[N][3]={
+        {0,0,0},
+        {0,0,0},
+        {0,0,0},
+        {1,0,0},
+        {1,0,0},
+        {1,2,0},
+        {2,0,0},
+        {2,3,0},
+        {0,0,0},
+        {1,2,5}
+    };
+    int cantRec = 10;
+    int combinaciones = pow(2,cantRec);
+    int cromosoma[N];
+    int presupuesto=100;
+    for (int i = 0; i < combinaciones; i++) {
+        cargabin(i,cromosoma,cantRec);
+        bool predecValido=true;
+        int costoComb=0;
+        for (int j=0;j<cantRec;j++) {
+            if (cromosoma[j]==1) {
+                for (int k=0;k<3;k++) {
+                    if (recImp[j][k]!=0) {
+                        if (cromosoma[recImp[j][k]-1]==0) {
+                            predecValido=false;
+                            break;
+                        }
+                    }
+                }
+                costoComb+=Recurso[j][0];
+            }
+            if (!predecValido) break;
+        }
+        if (predecValido && costoComb>=0.8*presupuesto && costoComb<=presupuesto ){
+            cargabin(i,cromosoma,cantRec);
+            cout<<"combinacion "<<i<<"Recursos:";
+            for (int l=0;l<cantRec;l++) {
+                if (cromosoma[l]==1) {
+                    cout<<"R"<<l+1<<" ";
+                }
+            }
+            cout<<"|"<<costoComb<<"miles"<<endl;
+        }
+    }
+
+    return 0;
+}
