@@ -1,0 +1,66 @@
+//Preg4_2025_2_EX1
+
+int areaMaxHistograma(int alturas[M]) {
+    Pila pila;
+    ElementoPila elemento;
+    construir(pila);
+
+    int areaMax = 0;
+    int tiempo = 0;
+
+    while (tiempo < M) {
+        if (esPilaVacia(pila) || alturas[cima(pila).numero] <= alturas[tiempo]) {
+            elemento.numero = tiempo;
+            apilar(pila, elemento);
+            tiempo++;
+        } else {
+            elemento = desapilar(pila);
+            int altura = alturas[elemento.numero];
+            int ancho = esPilaVacia(pila) ? tiempo : tiempo - cima(pila).numero - 1;
+            int area = altura * ancho;
+            if (area > areaMax) areaMax = area;
+        }
+    }
+
+    while (!esPilaVacia(pila)) {
+        elemento = desapilar(pila);
+        int altura = alturas[elemento.numero];
+        int ancho = esPilaVacia(pila) ? tiempo : tiempo - cima(pila).numero - 1;
+        int area = altura * ancho;
+        if (area > areaMax) areaMax = area;
+    }
+
+    return areaMax;
+}
+
+int cortarJardin(int jardin[N][M]) {
+    int alturas[M] = {0};
+    int areaMaxima = 0;
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            if (jardin[i][j] == 1)
+                alturas[j] += 1;
+            else
+                alturas[j] = 0;
+        }
+        int areaFila = areaMaxHistograma(alturas);
+        if (areaFila > areaMaxima)
+            areaMaxima = areaFila;
+    }
+
+    return areaMaxima;
+}
+int main() {
+    int jardin[N][M]={
+        {1,1,0,0},
+        {1,0,1,1},
+        {1,0,1,1},
+        {1,0,1,1}
+    };
+
+    cout<<"La solucion sera: "<<cortarJardin(jardin);
+
+
+    return 0;
+}
