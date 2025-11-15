@@ -1,0 +1,265 @@
+int esOperador(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/';
+}
+int Operacion(char operador, int operando1, int operando2) {
+    if (operador == '+')
+        return operando1 + operando2;
+    if (operador == '-')
+        return operando1 - operando2;
+    if (operador == '*')
+        return operando1 * operando2;
+    if (operador == '/')
+        return operando1 / operando2;
+}
+int EjecutarExpresionRecursiva (NodoArbolBinario * nodo) {
+    int resultado;
+    int operando1, operando2;
+    char elemento;
+
+    //CASO BASE
+    if (esNodoVacio(nodo))
+        resultado=0;
+    //PARTE RECURSIVA
+    if (esOperador(nodo->elemento.valor)) {
+        operando1=EjecutarExpresionRecursiva(nodo->izquierda);
+        operando2=EjecutarExpresionRecursiva(nodo->derecha);
+        resultado=Operacion(nodo->elemento.valor, operando1, operando2);
+    }
+    else {
+        resultado=nodo->elemento.valor-'0';
+    }
+    return resultado;
+}
+int EjecutarExpresion(ArbolBinario arbol) {
+    return EjecutarExpresionRecursiva (arbol.raiz);
+}
+
+
+void OperacionPostFija(ArbolBinario & arbol) {
+    NodoArbolBinario * operando1;
+    NodoArbolBinario * operando2;
+
+    char valores[7]={'5','3','-','4','*','9','+'};
+
+    Pila pila;
+    construir(pila);
+    int i=0;
+    while (i<7) {
+        //Si es operador desapilamos
+        if (esOperador(valores[i])) {
+            operando2=desapilar(pila);
+            operando1=desapilar(pila);
+            plantarNodoArbolBinario(arbol.raiz, operando1, {valores[i]}, operando2);
+            apilar(pila, arbol.raiz);
+
+        }else {//Si es operando (no es operador) apilamos el número
+            //ArbolBinario arbol;
+            construir(arbol);
+            plantarNodoArbolBinario(arbol.raiz, nullptr, {valores[i]}, nullptr);
+            apilar(pila, arbol.raiz);
+        }
+        i++;
+    }
+}
+int main() {
+    ArbolBinario arbol;
+    construir(arbol);
+
+    OperacionPostFija(arbol);
+    recorrerEnOrden(arbol);
+
+    cout<<endl<<"Resultado de la operación: "<<EjecutarExpresion(arbol)<<endl;
+    return 0;
+}
+
+
+
+void plantarArbolBinarioCromosomaRecursivo(NodoArbolBinario *&raiz,ElementoArbolBinario elemento)
+{
+    if (raiz==nullptr)
+    {
+        plantarNodoArbolBinario(raiz,nullptr,elemento,nullptr);
+    }
+    elemento.bit = 0;
+    plantarArbolBinarioCromosomaRecursivo(raiz->izquierda,elemento);
+    elemento.bit = 1;
+    plantarArbolBinarioCromosomaRecursivo(raiz->derecha,elemento);
+}
+
+void plantarArbolBinarioCromosoma(struct ArbolBinario &arbol,ElementoArbolBinario elemento)
+{
+    plantarArbolBinarioCromosomaRecursivo(arbol.raiz,elemento);
+}
+
+int main()
+{
+    int arreglo[N] = {10,50};
+    int n=2;
+    /*Parte a, crear el arbol cromosomatico*/
+    ArbolBinario arbol;
+    construir(arbol);
+    ElementoArbolBinario elemento;
+    elemento.bit = 0;
+    elemento.numero = 0;
+    plantarNodoArbolBinario(arbol.raiz,nullptr,elemento,nullptr);
+    for (int i=0; i<n; i++)
+    {
+        elemento.numero = arreglo[i];
+        plantarArbolBinarioCromosoma(arbol,elemento);
+    }
+    return 0;
+}
+
+
+
+//Fecha:  jueves 30 Octubre 2025 
+//Autor: Ana Roncal
+
+#include <iostream>
+#include <iomanip>
+#include "funcionesArbolBinario.h"
+#include "ArbolBinario.h"
+using namespace std;
+
+void construir(struct ArbolBinario &arbol) {
+    arbol.raiz = nullptr;
+}
+
+bool esArbolVacio(struct ArbolBinario &nodo) {
+    return nodo.raiz == nullptr;
+}
+
+bool esNodoVacio(struct NodoArbolBinario *nodo) {
+    return nodo == nullptr;
+}
+
+void plantarArbolBinario(struct ArbolBinario &arbol, const struct ArbolBinario &izquierda,
+                         const struct ElementoArbolBinario &elemento, const struct ArbolBinario &derecha) {
+    plantarNodoArbolBinario(arbol.raiz, izquierda.raiz, elemento, derecha.raiz);
+}
+
+void plantarNodoArbolBinario(struct NodoArbolBinario *&nodo, struct NodoArbolBinario *izquierda,
+                             const struct ElementoArbolBinario &elemento, struct NodoArbolBinario *derecha) {
+    struct NodoArbolBinario *nuevo = new struct NodoArbolBinario;
+    nuevo->derecha = derecha;
+    nuevo->izquierda = izquierda;
+    nuevo->elemento = elemento;
+    nodo = nuevo;
+}
+
+void imprimirNodo(struct NodoArbolBinario *raiz) {
+    cout << setw(5) << raiz->elemento.numero;
+}
+
+void recorrerPreOrden(const struct ArbolBinario &arbol) {
+    recorrerPreOrdenRecursivo(arbol.raiz);
+}
+
+void recorrerPreOrdenRecursivo(struct NodoArbolBinario *nodo) {
+    if (not esNodoVacio(nodo)) {
+        imprimirNodo(nodo);
+        recorrerPreOrdenRecursivo(nodo->izquierda);
+        recorrerPreOrdenRecursivo(nodo->derecha);
+    }
+}
+
+void recorrerEnOrden(const struct ArbolBinario &arbol) {
+    recorrerEnOrdenRecursivo(arbol.raiz);
+}
+
+/*Va mostrar el árbol en orden */
+void recorrerEnOrdenRecursivo(struct NodoArbolBinario *nodo) {
+    if (not esNodoVacio(nodo)) {
+        recorrerEnOrdenRecursivo(nodo->izquierda);
+        imprimirNodo(nodo);
+        recorrerEnOrdenRecursivo(nodo->derecha);
+    }
+}
+
+void recorrerPostOrden(const struct ArbolBinario &arbol) {
+    recorrerPostOrdenRecursivo(arbol.raiz);
+}
+
+void recorrerPostOrdenRecursivo(struct NodoArbolBinario *nodo) {
+    if (not esNodoVacio(nodo)) {
+        recorrerPostOrdenRecursivo(nodo->izquierda);
+        recorrerPostOrdenRecursivo(nodo->derecha);
+        imprimirNodo(nodo);
+    }
+}
+
+int numeroHojas(const struct ArbolBinario &arbol) {
+    return numeroHojasRecursivo(arbol.raiz);
+}
+
+int numeroHojasRecursivo(struct NodoArbolBinario *nodo) {
+    if (esNodoVacio(nodo))
+        return 0;
+    else if (esNodoVacio(nodo->izquierda) and esNodoVacio(nodo->derecha))
+        return 1;
+    else
+        return numeroHojasRecursivo(nodo->izquierda) + numeroHojasRecursivo(nodo->derecha);
+}
+
+
+int numeroNodos(const struct ArbolBinario &arbol) {
+    return numeroNodosRecursivo(arbol.raiz);
+}
+
+int numeroNodosRecursivo(struct NodoArbolBinario *nodo) {
+    if (esNodoVacio(nodo))
+        return 0;
+    else
+        return 1 + numeroNodosRecursivo(nodo->izquierda) + numeroNodosRecursivo(nodo->derecha);
+}
+
+int altura(const struct ArbolBinario & arbol){
+    return alturaRecursivo(arbol.raiz);
+}
+
+int alturaRecursivo(struct NodoArbolBinario * nodo){
+    if(esNodoVacio(nodo))
+        return -1;
+    else if(esNodoVacio(nodo->izquierda) and esNodoVacio(nodo->derecha))
+        return 0;
+    else
+        return 1 + maximo(alturaRecursivo(nodo->izquierda), alturaRecursivo(nodo->derecha));
+}
+
+int maximo(int a, int b){
+    return a >= b ? a : b;
+}
+
+bool esEquilibrado(const struct ArbolBinario & arbol){
+    return esEquilibradoRecursivo(arbol.raiz);
+}
+
+bool esEquilibradoRecursivo(struct NodoArbolBinario * nodo){
+
+    if(esNodoVacio(nodo))
+        return true;
+    else{
+        int alturaHijoIzquierdo = alturaRecursivo(nodo->izquierda);
+        int alturaHijoDerecho = alturaRecursivo(nodo->derecha);
+        int diferencia = abs(alturaHijoIzquierdo - alturaHijoDerecho);
+        return diferencia <=1 and esEquilibradoRecursivo(nodo->izquierda) and
+                esEquilibradoRecursivo(nodo->derecha);
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
