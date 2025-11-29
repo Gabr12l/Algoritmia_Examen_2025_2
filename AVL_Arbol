@@ -1,0 +1,82 @@
+int obtenerFactorBalanceo(NodoArbol *raiz){
+	if (raiz==NULL){
+		return 0;
+	}
+	return alturaArbol(raiz->izquierda) - alturaArbol(raiz->derecha);
+}
+
+NodoArbol *rotacionDerecha(NodoArbol *raiz){
+	NodoArbol *izquierdo = raiz->izquierda;
+	NodoArbol *izquierdoHijoDerecho = izquierdo->derecha;
+	
+	/*Hacemos la rotacion derecha*/
+	izquierdo->derecha = raiz;
+	raiz->izquierda = izquierdoHijoDerecho;
+	
+	return izquierdo;
+}
+
+NodoArbol *rotacionIzquierda(NodoArbol *raiz){
+	NodoArbol *derecho = raiz->derecha;
+	NodoArbol *derechoHijoIzquierdo = derecho->izquierda;
+	
+	/*Hare la rotacion izquierda*/
+	derecho->izquierda = raiz;
+	raiz->derecha = derechoHijoIzquierdo;
+	
+	return derecho;
+}
+
+NodoArbol* insertarAVL(NodoArbol *&raiz,Elemento elemento){
+	/*Aqui vamos a realizar la l�gica normal de una insercion en ABB*/
+	if (raiz==NULL){
+        NodoArbol *nuevo = crearNuevoNodo(elemento,NULL,NULL);
+        return nuevo;
+    }
+    else{
+        if (elemento.numero < raiz->elemento.numero){
+            raiz->izquierda = insertarAVL(raiz->izquierda,elemento);
+        }
+        else{
+            if (elemento.numero > raiz->elemento.numero){
+                raiz->derecha = insertarAVL(raiz->derecha,elemento);
+            }
+            else{
+               cout << "El elemento " << elemento.numero << " ya se encuentra en el árbol" << endl;
+               return raiz;
+            }
+        }
+    }
+    /*Vamos a evaluar si la inserci�n a generado un cambio de equilibrio*/
+    /*Paso 1. Determinamos el factor de balanceo del nodo posterior a la insercion*/
+	int factorBalanceo = obtenerFactorBalanceo(raiz);
+	
+	if (factorBalanceo>1 || factorBalanceo<-1){
+		/*Aqui se genero un desbalance, por lo tanto debo balancearlo*/
+		if (factorBalanceo>1){
+			/*Izquierda*/
+			if (elemento.numero < raiz->izquierda->elemento.numero){
+				/*Izquierda*/
+				return rotacionDerecha(raiz);
+			}
+			else{
+				/*Derecha*/
+				raiz->izquierda = rotacionIzquierda(raiz->izquierda);
+				return rotacionDerecha(raiz);
+			}
+		}
+		else{
+			/*Derecha*/
+			if (elemento.numero < raiz->derecha->elemento.numero){
+				/*Izquierda*/
+				raiz->derecha = rotacionDerecha(raiz->derecha);
+				return rotacionIzquierda(raiz);
+			}
+			else{
+				/*Derecha*/
+				return rotacionIzquierda(raiz);
+			}
+		}
+	}
+	return raiz;
+}
