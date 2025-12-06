@@ -1,0 +1,50 @@
+int buscarPosicion(int arreglo[N],int inicio,int fin,int valorBuscar){
+    if (inicio>fin) return -1;
+    int mid = (inicio+fin)/2;
+    if (arreglo[mid]==valorBuscar)return mid;
+
+    /*Caso 1: La mitad de la izquierda está ordenada*/
+    if (arreglo[inicio]<=arreglo[mid]){
+        //Verificamos si valorBuscar puede estar dentro de esa mitad ordenda
+        if (valorBuscar>=arreglo[inicio] && valorBuscar<arreglo[mid]){
+            return buscarPosicion(arreglo,inicio,mid-1,valorBuscar);
+        }
+        else{
+            return buscarPosicion(arreglo,mid+1,fin,valorBuscar);
+        }
+    }
+    else{
+        /*Caso 2, la mitad derecha está ordenada*/
+        if (valorBuscar > arreglo[mid] && valorBuscar<=arreglo[fin]){
+            return buscarPosicion(arreglo,mid+1,fin,valorBuscar);
+        }
+        else{
+            return buscarPosicion(arreglo,inicio,mid-1,valorBuscar);
+        }
+    }
+}
+
+
+int buscarSolo(int arr[N],int inicio,int final) {
+    if (inicio==final) return arr[inicio];
+    if (inicio>final) return -1;
+    int medio = (inicio+final)/2;
+    if (medio%2==0) {
+        if (arr[medio]==arr[medio+1]) {
+            return buscarSolo(arr,medio+2,final);
+        }else {
+            return buscarSolo(arr,inicio,medio);
+        }
+    }else {
+        if (arr[medio]==arr[medio-1]) {
+            return buscarSolo(arr,medio+1,final);
+        }else {
+            return buscarSolo(arr,inicio,medio-1);
+        }
+    }
+}
+
+
+
+
+
