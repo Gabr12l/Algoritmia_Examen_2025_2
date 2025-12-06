@@ -1,0 +1,279 @@
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+using namespace std;
+#define N 7
+
+// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+// PseudocÃ³digo y explicaciÃ³n del balanceo
+
+struct Nodo {
+    int dni;
+    int altura;
+    Nodo *izq;
+    Nodo *der;
+};
+
+int altura(Nodo *nodo) {
+    if (nodo == nullptr) return 0;
+    return nodo->altura;
+
+}
+
+int factor_balance(Nodo *nodo) {
+    if (nodo==nullptr) return 0;
+    int altura_izq=altura(nodo->izq);
+    int altura_dere=altura(nodo->der);
+    return altura_izq-altura_dere;
+}
+
+
+//Rotaciones
+
+//RotaciÃ³n simple a la derecha LL
+Nodo *rotacionDerecha(Nodo *y) {
+    Nodo *x = y->izq;
+    Nodo *T1=x->der;
+
+    //rotar
+    x->der=y;
+    y->izq=T1;
+
+    //actualizar alturas
+    y->altura=1+max(altura(y->izq),altura(y->der));
+    x->altura=1+max(altura(x->izq),altura(x->der));
+
+    return x;
+
+}
+
+//RotaciÃ³n simple a la izquierda RR
+
+Nodo* rotacionIzquierda(Nodo *&x) {
+
+    Nodo *y = x->der;
+    Nodo *T2 = y->izq;
+
+    //rotar
+    y->izq=x;
+    x->der=T2;
+
+    //actualizar alturas
+    x->altura=1+max(altura(x->izq),altura(x->der));
+    y->altura=1+max(altura(y->izq),altura(y->der));
+
+    return y;
+}
+
+
+//insertarAVL
+
+Nodo * insertarAVL(Nodo *&nodo,int clave) {
+
+    if (nodo == nullptr) {
+        nodo=new Nodo;
+        nodo->dni=clave;
+        nodo->izq=nullptr;
+        nodo->der=nullptr;
+        nodo->altura=1;
+        return nodo;
+    }
+
+    //insercion ABB normal
+    if (clave<nodo->dni) {
+        nodo->izq=insertarAVL(nodo->izq,clave);
+    }else if (clave>nodo->dni) {
+        nodo->der=insertarAVL(nodo->der,clave);
+    }else return nodo;// clave igual, no insertamos duplicados
+
+    // 1) Actualizar altura del nodo actual
+    nodo->altura=1+max(altura(nodo->izq),altura(nodo->der));
+
+    // 2) Calcular factor de balance
+    //fb=factor_balance(nodo);
+
+    // 3) Revisar los 4 casos
+
+    // Caso LL
+
+    if (factor_balance(nodo)>1 && clave<nodo->izq->dni) {
+        return rotacionDerecha(nodo);
+    }
+    // Caso RR
+    if (factor_balance(nodo)<-1 && clave>nodo->der->dni) {
+        return rotacionIzquierda(nodo);
+    }
+    //CASO LR
+    if (factor_balance(nodo)>1 && clave>nodo->izq->dni) {
+        nodo->izq=rotacionIzquierda(nodo->izq);
+        return rotacionDerecha(nodo);
+    }
+    //CASO RL
+    if (factor_balance(nodo)<-1 && clave<nodo->der->dni) {
+        nodo->der=rotacionDerecha(nodo->der);
+        return rotacionIzquierda(nodo);
+    }
+
+
+    return nodo;
+
+}
+Nodo* nodoMinimo(Nodo* nodo) {
+    while (nodo->izq != nullptr)
+        nodo = nodo->izq;
+    return nodo;
+}
+
+Nodo *eliminarNodoAVL(Nodo *&nodo,int clave) {
+
+    if (nodo==nullptr) return nullptr;
+
+    if (clave<nodo->dni) {
+        nodo->izq=eliminarNodoAVL(nodo->izq,clave);
+    }else if (clave>nodo->dni) {
+        nodo->der=eliminarNodoAVL(nodo->der,clave);
+    }else {
+        Nodo *aux;
+        //caso sin hijos
+        if (nodo->izq==nullptr && nodo->der==nullptr) {
+            delete nodo;
+            return nullptr;
+        }
+        //caso solo hijo derecho
+        if (nodo->izq==nullptr) {
+            aux=nodo->der;
+            delete nodo;
+            return aux;
+        }
+        //caso solo hijo izquierdo
+        if (nodo->der==nullptr) {
+            aux=nodo->izq;
+            delete nodo;
+            return aux;
+        }
+        //dos hijos
+        aux=nodoMinimo(nodo->der);
+        nodo->dni=aux->dni;
+        nodo->der=eliminarNodoAVL(nodo->der,aux->dni);
+    }
+    //si quedo vacio
+    if (nodo==nullptr) return nullptr;
+
+    //recalcular altura
+    nodo->altura=1+max(altura(nodo->izq),altura(nodo->der));
+
+    //  LL
+    if (factor_balance(nodo)>1 and factor_balance(nodo->izq)>=0) {
+        return rotacionDerecha(nodo);
+    }
+
+    //  RR
+    if (factor_balance(nodo)<-1 and factor_balance(nodo->der)<=0) {
+        return rotacionIzquierda(nodo);
+    }
+
+    //LR
+    if (factor_balance(nodo)>1 and factor_balance(nodo->izq)<0) {
+        nodo->izq=rotacionIzquierda(nodo->izq);
+        return rotacionDerecha(nodo);
+    }
+    //RL
+    if (factor_balance(nodo)<-1 and factor_balance(nodo->der)>0) {
+        nodo->der=rotacionDerecha(nodo->der);
+        return rotacionIzquierda(nodo);
+    }
+    return nodo;
+}
+
+//contar nodos
+int contarNodos(Nodo *nodo) {
+    if (nodo==nullptr) return 0;
+    return 1+contarNodos(nodo->izq)+contarNodos(nodo->der);
+}
+
+//BUSCAR K_ENESIMO
+Nodo* buscar_k_enesimo(Nodo *nodo,int k) {
+
+    if (nodo==nullptr) return nullptr;
+
+    int nodos_izq=contarNodos(nodo->izq);
+    if (k==nodos_izq+1) return nodo;
+    if (k<=nodos_izq) return buscar_k_enesimo(nodo->izq,k);
+
+    return buscar_k_enesimo(nodo->der,k-(nodos_izq+1));
+}
+
+//ESTRUCTURA DEL ABB
+
+struct ABB {
+    struct Nodo * raiz;
+};
+
+void construir(struct ABB &arbol) {
+    arbol.raiz = nullptr;
+}
+bool esNodoVacio(const struct Nodo *nodo) {
+    return nodo == nullptr;
+}
+
+
+void imprimirNodo(struct Nodo *raiz) {
+    cout << setw(5) << raiz->dni<<"(h:"<<raiz->altura<<')'<<" ";
+}
+
+/*Va mostrar el ÃƒÂ¡rbol en orden */
+void recorrerEnOrdenRecursivo(struct Nodo *nodo) {
+    if (not esNodoVacio(nodo)) {
+        recorrerEnOrdenRecursivo(nodo->izq);
+        imprimirNodo(nodo);
+        recorrerEnOrdenRecursivo(nodo->der);
+    }
+}
+
+void recorrerEnOrden(const struct ABB &arbol) {
+    recorrerEnOrdenRecursivo(arbol.raiz);
+}
+
+int main() {
+
+    ABB arbol;
+    construir(arbol);
+
+    //implementacion
+    int dnis[N]={72649318, 50823147, 81234567, 40987654, 65012345, 94561237, 30124598};
+    for (int i = 0; i < N; i++) {
+        Nodo *nodo;
+        nodo=insertarAVL(arbol.raiz,dnis[i]);
+        //cout<<"Insertar "<<nodo->dni<<endl;
+    }
+    recorrerEnOrden(arbol);
+    cout << endl;
+
+    int total=contarNodos(arbol.raiz);
+
+    if(total%2==1){
+        int k=(total/2)+1;
+        Nodo *mediana=buscar_k_enesimo(arbol.raiz,k);
+        cout<<"La mediana es: "<<mediana->dni<<endl;
+    }else{
+        int k1=(total/2);
+        int k2=(total/2)+1;
+        Nodo *med1=buscar_k_enesimo(arbol.raiz,k1);
+        Nodo *med2=buscar_k_enesimo(arbol.raiz,k2);
+
+        double mediana=(med1->dni+med2->dni)/2.0;
+        cout<<"La mediana es: "<<mediana<<endl;
+    }
+
+
+    arbol.raiz = eliminarNodoAVL(arbol.raiz, 50823147);
+    recorrerEnOrden(arbol);
+
+    cout << endl;
+
+    return 0;
+    // TIP See CLion help at <a href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>. Also, you can try interactive lessons for CLion by selecting 'Help | Learn IDE Features' from the main menu.
+}
